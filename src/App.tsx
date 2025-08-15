@@ -28,7 +28,7 @@ const WORDS = [
 
 const GAME_TIME = 30 // seconds
 
-export default function SpaceTypingGame() {
+export default function App() {
   const [gameState, setGameState] = useState<"menu" | "playing" | "gameOver">("menu")
   const [currentWord, setCurrentWord] = useState("")
   const [typedText, setTypedText] = useState("")
@@ -102,7 +102,7 @@ export default function SpaceTypingGame() {
   }, [handleKeyPress])
 
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval: number
     if (gameState === "playing" && timeLeft > 0) {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
