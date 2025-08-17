@@ -72,6 +72,8 @@ export default function SpaceTypingGame() {
   const [gameState, setGameState] = useState<"menu" | "playing" | "gameOver">("menu")
   const [missionType, setMissionType] = useState<MissionType>("WORDS")
   const [wordTimeLimit, setWordTimeLimit] = useState(1) // seconds per word
+  const [customTimeInput, setCustomTimeInput] = useState("")
+  const [isUsingCustomTime, setIsUsingCustomTime] = useState(false)
   const [wordTimeLeft, setWordTimeLeft] = useState(1) // time left for current word
   const [currentWord, setCurrentWord] = useState("")
   const [typedText, setTypedText] = useState("")
@@ -260,6 +262,21 @@ export default function SpaceTypingGame() {
     }
   }, [gameState, timeLeft, wordTimeLeft, missionType, wordTimeLimit])
 
+  const handleCustomTimeChange = (value: string) => {
+    setCustomTimeInput(value)
+    const numValue = Number.parseFloat(value)
+    if (!isNaN(numValue) && numValue > 0 && numValue <= 60) {
+      setWordTimeLimit(numValue)
+      setIsUsingCustomTime(true)
+    }
+  }
+
+  const handlePresetTimeSelect = (time: number) => {
+    setWordTimeLimit(time)
+    setIsUsingCustomTime(false)
+    setCustomTimeInput("")
+  }
+
   return (
     <div className="w-full h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 z-0">
@@ -325,18 +342,35 @@ export default function SpaceTypingGame() {
               {missionType === "TIMED_TYPING" && (
                 <div className="mb-6">
                   <p className="text-sm text-muted-foreground mb-3">Time per word (seconds):</p>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-2 mb-3">
                     {TIME_OPTIONS.map((time) => (
                       <Button
                         key={time}
-                        onClick={() => setWordTimeLimit(time)}
-                        variant={wordTimeLimit === time ? "default" : "outline"}
+                        onClick={() => handlePresetTimeSelect(time)}
+                        variant={wordTimeLimit === time && !isUsingCustomTime ? "default" : "outline"}
                         size="sm"
                         className="text-xs"
                       >
                         {time}s
                       </Button>
                     ))}
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Or enter custom time:</p>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="number"
+                        min="0.1"
+                        max="60"
+                        step="0.1"
+                        placeholder="e.g. 1.5"
+                        value={customTimeInput}
+                        onChange={(e) => handleCustomTimeChange(e.target.value)}
+                        className="flex-1 px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      />
+                      <span className="text-sm text-muted-foreground">seconds</span>
+                    </div>
+                    {isUsingCustomTime && <p className="text-xs text-primary">Using custom time: {wordTimeLimit}s</p>}
                   </div>
                 </div>
               )}
