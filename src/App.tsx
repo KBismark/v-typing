@@ -73,7 +73,7 @@ export default function SpaceTypingGame() {
         });
         // for(let i = 0; i<typedText.length; i++){
         //   if(typedText[i] !== currentWord[i]){
-        //       setNextKeyIndex(i);
+        //       setNextCorrectKeyIndex(i);
         //     break;
         //   }
         // }
@@ -95,7 +95,7 @@ export default function SpaceTypingGame() {
           setWordsCompleted((prev) => prev + 1);
           setCurrentWord(getRandomWord());
           setTypedText("");
-          setNextKeyIndex(0);
+          setNextCorrectKeyIndex(0);
         }
       }
     },
@@ -111,7 +111,7 @@ export default function SpaceTypingGame() {
   //   for(let i = 0; i<typedText.length; i++){
   //     if(typedText[i] !== currentWord[i]){
   //       setTimeout(() => {
-  //         setNextKeyIndex(i);
+  //         setNextCorrectKeyIndex(i);
   //       }, 50);
   //       break;
   //     }
@@ -121,14 +121,14 @@ export default function SpaceTypingGame() {
 
   // for(let i = 0; i<typedText.length; i++){
   //   if(typedText[i] !== currentWord[i]){
-  //     setNextKeyIndex(i);
+  //     setNextCorrectKeyIndex(i);
   //     break;
   //   }
   // }
   // useEffect(()=>{
   //   for(let i = 0; i<typedText.length; i++){
   //     if(typedText[i] !== currentWord[i]){
-  //       setNextKeyIndex(i);
+  //       setNextCorrectKeyIndex(i);
   //       break;
   //     }
   //   }
