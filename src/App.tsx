@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect, useCallback } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Stars } from "@react-three/drei"
@@ -30,7 +32,7 @@ export default function SpaceTypingGame() {
   const [gameState, setGameState] = useState<"menu" | "playing" | "gameOver">("menu")
   const [currentWord, setCurrentWord] = useState("")
   const [typedText, setTypedText] = useState("")
-  const [nextCorrectKeyIndex, setNextCorrectKeyIndex] = useState(0);
+  const [nextCorrectKeyIndex, setNextCorrectKeyIndex] = useState(0)
   const [timeLeft, setTimeLeft] = useState(GAME_TIME)
   const [score, setScore] = useState(0)
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set())
@@ -70,13 +72,7 @@ export default function SpaceTypingGame() {
           const newSet = new Set(prev)
           newSet.delete(key)
           return newSet
-        });
-        // for(let i = 0; i<typedText.length; i++){
-        //   if(typedText[i] !== currentWord[i]){
-        //       setNextCorrectKeyIndex(i);
-        //     break;
-        //   }
-        // }
+        })
       }, 200)
 
       if (key === "backspace") {
@@ -91,11 +87,11 @@ export default function SpaceTypingGame() {
         setTypedText(newTypedText)
 
         if (newTypedText.toLowerCase() === currentWord.toLowerCase()) {
-          setScore((prev) => prev + currentWord.length * 10);
-          setWordsCompleted((prev) => prev + 1);
-          setCurrentWord(getRandomWord());
-          setTypedText("");
-          setNextCorrectKeyIndex(0);
+          setScore((prev) => prev + currentWord.length * 10)
+          setWordsCompleted((prev) => prev + 1)
+          setCurrentWord(getRandomWord())
+          setTypedText("")
+          setNextCorrectKeyIndex(0)
         }
       }
     },
@@ -105,50 +101,28 @@ export default function SpaceTypingGame() {
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress)
     return () => window.removeEventListener("keydown", handleKeyPress)
-  }, [handleKeyPress]);
+  }, [handleKeyPress])
 
-  // if(typedText.length!==0){
-  //   for(let i = 0; i<typedText.length; i++){
-  //     if(typedText[i] !== currentWord[i]){
-  //       setTimeout(() => {
-  //         setNextCorrectKeyIndex(i);
-  //       }, 50);
-  //       break;
-  //     }
-  //   }
-  // }
+  useEffect(() => {
+    if (gameState !== "playing") return
 
+    // Find the first incorrect character or the next character to type
+    let nextIndex = typedText.length
 
-  // for(let i = 0; i<typedText.length; i++){
-  //   if(typedText[i] !== currentWord[i]){
-  //     setNextCorrectKeyIndex(i);
-  //     break;
-  //   }
-  // }
-  // useEffect(()=>{
-  //   for(let i = 0; i<typedText.length; i++){
-  //     if(typedText[i] !== currentWord[i]){
-  //       setNextCorrectKeyIndex(i);
-  //       break;
-  //     }
-  //   }
-  // },[typedText,currentWord]);
+    for (let i = 0; i < typedText.length; i++) {
+      if (typedText[i].toLowerCase() !== currentWord[i].toLowerCase()) {
+        nextIndex = i
+        break
+      }
+    }
 
-  // useEffect(() => {
-  //   let interval: NodeJS.Timeout
-  //   if (gameState === "playing" && timeLeft > 0) {
-  //     interval = setInterval(() => {
-  //       setTimeLeft((prev) => {
-  //         if (prev <= 1) {
-  //           endGame()
-  //           return 0
-  //         }
-  //         return prev - 1
-  //       })
-  //     }, 1000)
-  //   }
-  //   return () => clearInterval(interval)
-  // }, [gameState, timeLeft])
+    // Ensure we don't go beyond the word length
+    if (nextIndex >= currentWord.length) {
+      nextIndex = currentWord.length - 1
+    }
+
+    setNextCorrectKeyIndex(nextIndex)
+  }, [typedText, currentWord, gameState])
 
   return (
     <div className="w-full h-screen bg-background relative overflow-hidden">
@@ -228,7 +202,11 @@ export default function SpaceTypingGame() {
 
         {gameState === "playing" && (
           <div className="absolute bottom-4 bg-[#0f172a] left-0 right-0 px-4 -mb-16">
-            <VirtualKeyboard pressedKeys={pressedKeys} isCapsLockOn={isCapsLockOn} nextKey={currentWord[nextCorrectKeyIndex]} />
+            <VirtualKeyboard
+              pressedKeys={pressedKeys}
+              isCapsLockOn={isCapsLockOn}
+              nextKey={currentWord[nextCorrectKeyIndex]}
+            />
           </div>
         )}
       </div>
