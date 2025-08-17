@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from "react"
 import { Canvas } from "@react-three/fiber"
 import { Stars } from "@react-three/drei"
@@ -31,7 +30,7 @@ export default function SpaceTypingGame() {
   const [gameState, setGameState] = useState<"menu" | "playing" | "gameOver">("menu")
   const [currentWord, setCurrentWord] = useState("")
   const [typedText, setTypedText] = useState("")
-  const [nextKeyIndex, setNextKeyIndex] = useState(0);
+  const [nextCorrectKeyIndex, setNextCorrectKeyIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(GAME_TIME)
   const [score, setScore] = useState(0)
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set())
