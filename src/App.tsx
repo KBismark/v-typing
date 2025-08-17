@@ -26,10 +26,49 @@ const WORDS = [
   "fusion",
 ]
 
+const LEFT_HAND = [
+  "qwert",
+  "asdfg",
+  "zxcvb",
+  "qwe",
+  "asd",
+  "zxc",
+  "wer",
+  "sdf",
+  "xcv",
+  "ert",
+  "dfg",
+  "cvb",
+  "qwer",
+  "asdf",
+  "zxcv",
+]
+
+const RIGHT_HAND = [
+  "yuiop",
+  "hjkl",
+  "nm",
+  "yui",
+  "hjk",
+  "uio",
+  "jkl",
+  "iop",
+  "yuio",
+  "hjkl",
+  "uiop",
+  "jklm",
+  "yui",
+  "hjk",
+  "iop",
+]
+
+type MissionType = "WORDS" | "LEFT_HAND" | "RIGHT_HAND"
+
 const GAME_TIME = 30 // seconds
 
 export default function SpaceTypingGame() {
   const [gameState, setGameState] = useState<"menu" | "playing" | "gameOver">("menu")
+  const [missionType, setMissionType] = useState<MissionType>("WORDS")
   const [currentWord, setCurrentWord] = useState("")
   const [typedText, setTypedText] = useState("")
   const [nextCorrectKeyIndex, setNextCorrectKeyIndex] = useState(0)
@@ -39,7 +78,16 @@ export default function SpaceTypingGame() {
   const [wordsCompleted, setWordsCompleted] = useState(0)
   const [isCapsLockOn, setIsCapsLockOn] = useState(false)
 
-  const getRandomWord = () => WORDS[Math.floor(Math.random() * WORDS.length)]
+  const getRandomWord = () => {
+    switch (missionType) {
+      case "LEFT_HAND":
+        return LEFT_HAND[Math.floor(Math.random() * LEFT_HAND.length)]
+      case "RIGHT_HAND":
+        return RIGHT_HAND[Math.floor(Math.random() * RIGHT_HAND.length)]
+      default:
+        return WORDS[Math.floor(Math.random() * WORDS.length)]
+    }
+  }
 
   const startGame = () => {
     setGameState("playing")
@@ -151,10 +199,35 @@ export default function SpaceTypingGame() {
       <div className="relative z-20 flex flex-col h-full">
         {gameState === "menu" && (
           <div className="flex items-center justify-center h-full">
-            <Card className="p-8 bg-card/80 backdrop-blur-sm border-primary/20 text-center">
+            <Card className="p-8 bg-card/80 backdrop-blur-sm border-primary/20 text-center max-w-md">
               <h1 className="text-4xl font-bold mb-4 text-primary animate-glow">Space Typer</h1>
-              <p className="text-muted-foreground mb-6">Type the words as fast as you can before time runs out!</p>
-              <Button onClick={startGame} className="bg-primary hover:bg-primary/80 text-primary-foreground">
+              <p className="text-muted-foreground mb-6">Choose your training mission:</p>
+
+              <div className="space-y-3 mb-6">
+                <Button
+                  onClick={() => setMissionType("WORDS")}
+                  variant={missionType === "WORDS" ? "default" : "outline"}
+                  className="w-full"
+                >
+                  Main Mission (Words)
+                </Button>
+                <Button
+                  onClick={() => setMissionType("LEFT_HAND")}
+                  variant={missionType === "LEFT_HAND" ? "default" : "outline"}
+                  className="w-full"
+                >
+                  Left Hand Training
+                </Button>
+                <Button
+                  onClick={() => setMissionType("RIGHT_HAND")}
+                  variant={missionType === "RIGHT_HAND" ? "default" : "outline"}
+                  className="w-full"
+                >
+                  Right Hand Training
+                </Button>
+              </div>
+
+              <Button onClick={startGame} className="bg-primary hover:bg-primary/80 text-primary-foreground w-full">
                 Start Mission
               </Button>
             </Card>
@@ -186,16 +259,33 @@ export default function SpaceTypingGame() {
                   Words Completed: <span className="text-accent font-bold">{wordsCompleted}</span>
                 </p>
                 <p className="text-muted-foreground">
-                  {wordsCompleted >= 10
-                    ? "Excellent work, Space Commander!"
-                    : wordsCompleted >= 5
-                      ? "Good job, Cadet!"
-                      : "Keep practicing, Recruit!"}
+                  {missionType === "LEFT_HAND"
+                    ? wordsCompleted >= 10
+                      ? "Left hand mastery achieved!"
+                      : wordsCompleted >= 5
+                        ? "Good left hand progress!"
+                        : "Keep training your left hand!"
+                    : missionType === "RIGHT_HAND"
+                      ? wordsCompleted >= 10
+                        ? "Right hand mastery achieved!"
+                        : wordsCompleted >= 5
+                          ? "Good right hand progress!"
+                          : "Keep training your right hand!"
+                      : wordsCompleted >= 10
+                        ? "Excellent work, Space Commander!"
+                        : wordsCompleted >= 5
+                          ? "Good job, Cadet!"
+                          : "Keep practicing, Recruit!"}
                 </p>
               </div>
-              <Button onClick={startGame} className="bg-primary hover:bg-primary/80 text-primary-foreground">
-                Try Again
-              </Button>
+              <div className="space-y-2">
+                <Button onClick={startGame} className="bg-primary hover:bg-primary/80 text-primary-foreground w-full">
+                  Try Again
+                </Button>
+                <Button onClick={() => setGameState("menu")} variant="outline" className="w-full">
+                  Change Mission
+                </Button>
+              </div>
             </Card>
           </div>
         )}
