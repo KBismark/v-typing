@@ -243,13 +243,7 @@ export default function SpaceTypingGame() {
             if (wordTimeLeft > 0) {
               setWordTimeLeft((prev) => prev - 0.1)
             } else {
-              const newWord = getRandomWord()
-              setCurrentWord(newWord)
-              setTypedText("")
-              setNextCorrectKeyIndex(0)
-              setNeedsBackspace(false)
-              setWordTimeLeft(wordTimeLimit)
-              setTotalMistakes((prev) => prev + 1)
+              endGame()
             }
           } else {
             if (timeLeft > 0) {
