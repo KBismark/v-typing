@@ -119,12 +119,6 @@ export default function SpaceTypingGame() {
   // }
 
 
-  // typedText.split('').forEach((char,index)=>{
-  //   if(char === currentWord[nextKeyIndex]){
-  //     setNextKeyIndex(index+1);
-  //   }
-  // });
-
   // for(let i = 0; i<typedText.length; i++){
   //   if(typedText[i] !== currentWord[i]){
   //     setNextKeyIndex(i);
@@ -234,7 +228,7 @@ export default function SpaceTypingGame() {
 
         {gameState === "playing" && (
           <div className="absolute bottom-4 bg-[#0f172a] left-0 right-0 px-4 -mb-16">
-            <VirtualKeyboard pressedKeys={pressedKeys} isCapsLockOn={isCapsLockOn} nextKey={currentWord[nextKeyIndex]} />
+            <VirtualKeyboard pressedKeys={pressedKeys} isCapsLockOn={isCapsLockOn} nextKey={currentWord[nextCorrectKeyIndex]} />
           </div>
         )}
       </div>
