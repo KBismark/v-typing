@@ -72,6 +72,7 @@ export default function SpaceTypingGame() {
   const [currentWord, setCurrentWord] = useState("")
   const [typedText, setTypedText] = useState("")
   const [nextCorrectKeyIndex, setNextCorrectKeyIndex] = useState(0)
+  const [needsBackspace, setNeedsBackspace] = useState(false)
   const [timeLeft, setTimeLeft] = useState(GAME_TIME)
   const [score, setScore] = useState(0)
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set())
@@ -97,6 +98,7 @@ export default function SpaceTypingGame() {
     setScore(0)
     setWordsCompleted(0)
     setPressedKeys(new Set())
+    setNeedsBackspace(false)
   }
 
   const endGame = () => {
@@ -147,6 +149,7 @@ export default function SpaceTypingGame() {
 
       if (key === "backspace") {
         setTypedText((prev) => prev.slice(0, -1))
+        setNeedsBackspace(false)
       } else if (key.length === 1 && /[a-z]/.test(key)) {
         const isShiftPressed = event.shiftKey
         const shouldBeUppercase = isShiftPressed !== isCapsLockOn
@@ -161,10 +164,13 @@ export default function SpaceTypingGame() {
 
           if (typedChar !== expectedChar) {
             playErrorSound()
+            setNeedsBackspace(true)
+          } else {
+            setNeedsBackspace(false)
           }
         } else {
-          // Typing beyond word length - also an error
           playErrorSound()
+          setNeedsBackspace(true)
         }
 
         setTypedText(newTypedText)
@@ -175,6 +181,7 @@ export default function SpaceTypingGame() {
           setCurrentWord(getRandomWord())
           setTypedText("")
           setNextCorrectKeyIndex(0)
+          setNeedsBackspace(false)
         }
       }
     },
@@ -189,7 +196,6 @@ export default function SpaceTypingGame() {
   useEffect(() => {
     if (gameState !== "playing") return
 
-    // Find the first incorrect character or the next character to type
     let nextIndex = typedText.length
 
     for (let i = 0; i < typedText.length; i++) {
@@ -199,7 +205,6 @@ export default function SpaceTypingGame() {
       }
     }
 
-    // Ensure we don't go beyond the word length
     if (nextIndex >= currentWord.length) {
       nextIndex = currentWord.length - 1
     }
@@ -330,7 +335,7 @@ export default function SpaceTypingGame() {
             <VirtualKeyboard
               pressedKeys={pressedKeys}
               isCapsLockOn={isCapsLockOn}
-              nextKey={currentWord[nextCorrectKeyIndex]}
+              nextKey={needsBackspace ? "Backspace" : currentWord[nextCorrectKeyIndex]}
             />
           </div>
         )}
