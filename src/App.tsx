@@ -149,7 +149,6 @@ export default function SpaceTypingGame() {
 
       if (key === "backspace") {
         setTypedText((prev) => prev.slice(0, -1))
-        setNeedsBackspace(false)
       } else if (key.length === 1 && /[a-z]/.test(key)) {
         const isShiftPressed = event.shiftKey
         const shouldBeUppercase = isShiftPressed !== isCapsLockOn
@@ -164,13 +163,9 @@ export default function SpaceTypingGame() {
 
           if (typedChar !== expectedChar) {
             playErrorSound()
-            setNeedsBackspace(true)
-          } else {
-            setNeedsBackspace(false)
           }
         } else {
           playErrorSound()
-          setNeedsBackspace(true)
         }
 
         setTypedText(newTypedText)
@@ -189,18 +184,15 @@ export default function SpaceTypingGame() {
   )
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyPress)
-    return () => window.removeEventListener("keydown", handleKeyPress)
-  }, [handleKeyPress])
-
-  useEffect(() => {
     if (gameState !== "playing") return
 
     let nextIndex = typedText.length
+    let hasIncorrectCharacters = false
 
     for (let i = 0; i < typedText.length; i++) {
       if (typedText[i].toLowerCase() !== currentWord[i].toLowerCase()) {
         nextIndex = i
+        hasIncorrectCharacters = true
         break
       }
     }
@@ -210,6 +202,7 @@ export default function SpaceTypingGame() {
     }
 
     setNextCorrectKeyIndex(nextIndex)
+    setNeedsBackspace(hasIncorrectCharacters)
   }, [typedText, currentWord, gameState])
 
   return (
