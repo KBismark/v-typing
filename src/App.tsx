@@ -62,13 +62,17 @@ const RIGHT_HAND = [
   "iop",
 ]
 
-type MissionType = "WORDS" | "LEFT_HAND" | "RIGHT_HAND"
+const TIME_OPTIONS = [0.2, 0.3, 0.6, 1, 2, 3, 5]
+
+type MissionType = "WORDS" | "LEFT_HAND" | "RIGHT_HAND" | "TIMED_TYPING"
 
 const GAME_TIME = 30 // seconds
 
 export default function SpaceTypingGame() {
   const [gameState, setGameState] = useState<"menu" | "playing" | "gameOver">("menu")
   const [missionType, setMissionType] = useState<MissionType>("WORDS")
+  const [wordTimeLimit, setWordTimeLimit] = useState(1) // seconds per word
+  const [wordTimeLeft, setWordTimeLeft] = useState(1) // time left for current word
   const [currentWord, setCurrentWord] = useState("")
   const [typedText, setTypedText] = useState("")
   const [nextCorrectKeyIndex, setNextCorrectKeyIndex] = useState(0)
@@ -94,9 +98,11 @@ export default function SpaceTypingGame() {
 
   const startGame = () => {
     setGameState("playing")
-    setCurrentWord(getRandomWord())
+    const newWord = getRandomWord()
+    setCurrentWord(newWord)
     setTypedText("")
     setTimeLeft(GAME_TIME)
+    setWordTimeLeft(missionType === "TIMED_TYPING" ? wordTimeLimit : GAME_TIME)
     setScore(0)
     setWordsCompleted(0)
     setPressedKeys(new Set())
@@ -181,14 +187,18 @@ export default function SpaceTypingGame() {
         if (newTypedText.toLowerCase() === currentWord.toLowerCase()) {
           setScore((prev) => prev + currentWord.length * 10)
           setWordsCompleted((prev) => prev + 1)
-          setCurrentWord(getRandomWord())
+          const newWord = getRandomWord()
+          setCurrentWord(newWord)
           setTypedText("")
           setNextCorrectKeyIndex(0)
           setNeedsBackspace(false)
+          if (missionType === "TIMED_TYPING") {
+            setWordTimeLeft(wordTimeLimit)
+          }
         }
       }
     },
-    [gameState, typedText, currentWord, isCapsLockOn, playErrorSound],
+    [gameState, typedText, currentWord, isCapsLockOn, playErrorSound, missionType, wordTimeLimit],
   )
 
   useEffect(() => {
@@ -226,15 +236,35 @@ export default function SpaceTypingGame() {
   }, [gameState, handleKeyPress])
 
   useEffect(() => {
-    if (gameState === "playing" && timeLeft > 0) {
-      const timer = setTimeout(() => {
-        setTimeLeft((prev) => prev - 1)
-      }, 1000)
+    if (gameState === "playing") {
+      const timer = setTimeout(
+        () => {
+          if (missionType === "TIMED_TYPING") {
+            if (wordTimeLeft > 0) {
+              setWordTimeLeft((prev) => prev - 0.1)
+            } else {
+              const newWord = getRandomWord()
+              setCurrentWord(newWord)
+              setTypedText("")
+              setNextCorrectKeyIndex(0)
+              setNeedsBackspace(false)
+              setWordTimeLeft(wordTimeLimit)
+              setTotalMistakes((prev) => prev + 1)
+            }
+          } else {
+            if (timeLeft > 0) {
+              setTimeLeft((prev) => prev - 1)
+            } else {
+              endGame()
+            }
+          }
+        },
+        missionType === "TIMED_TYPING" ? 100 : 1000,
+      )
+
       return () => clearTimeout(timer)
-    } else if (gameState === "playing" && timeLeft === 0) {
-      endGame()
     }
-  }, [gameState, timeLeft])
+  }, [gameState, timeLeft, wordTimeLeft, missionType, wordTimeLimit])
 
   return (
     <div className="w-full h-screen bg-background relative overflow-hidden">
@@ -289,7 +319,33 @@ export default function SpaceTypingGame() {
                 >
                   Right Hand Training
                 </Button>
+                <Button
+                  onClick={() => setMissionType("TIMED_TYPING")}
+                  variant={missionType === "TIMED_TYPING" ? "default" : "outline"}
+                  className="w-full"
+                >
+                  Timed Typing
+                </Button>
               </div>
+
+              {missionType === "TIMED_TYPING" && (
+                <div className="mb-6">
+                  <p className="text-sm text-muted-foreground mb-3">Time per word (seconds):</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {TIME_OPTIONS.map((time) => (
+                      <Button
+                        key={time}
+                        onClick={() => setWordTimeLimit(time)}
+                        variant={wordTimeLimit === time ? "default" : "outline"}
+                        size="sm"
+                        className="text-xs"
+                      >
+                        {time}s
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <Button onClick={startGame} className="bg-primary hover:bg-primary/80 text-primary-foreground w-full">
                 Start Mission
@@ -303,10 +359,10 @@ export default function SpaceTypingGame() {
             <GameInterface
               currentWord={currentWord}
               typedText={typedText}
-              timeLeft={timeLeft}
+              timeLeft={missionType === "TIMED_TYPING" ? wordTimeLeft : timeLeft}
               score={score}
               wordsCompleted={wordsCompleted}
-              totalTime={GAME_TIME}
+              totalTime={missionType === "TIMED_TYPING" ? wordTimeLimit : GAME_TIME}
             />
           </div>
         )}
@@ -324,7 +380,9 @@ export default function SpaceTypingGame() {
                 </p>
                 <p className="text-lg">
                   Words Per Second:{" "}
-                  <span className="text-accent font-bold">{(wordsCompleted / (GAME_TIME - timeLeft)).toFixed(1)}</span>
+                  <span className="text-accent font-bold">
+                    {missionType === "TIMED_TYPING" ? "N/A" : (wordsCompleted / (GAME_TIME - timeLeft)).toFixed(1)}
+                  </span>
                 </p>
                 <p className="text-lg">
                   Mistakes Rate:{" "}
@@ -333,23 +391,29 @@ export default function SpaceTypingGame() {
                   </span>
                 </p>
                 <p className="text-muted-foreground">
-                  {missionType === "LEFT_HAND"
-                    ? wordsCompleted >= 10
-                      ? "Left hand mastery achieved!"
-                      : wordsCompleted >= 5
-                        ? "Good left hand progress!"
-                        : "Keep training your left hand!"
-                    : missionType === "RIGHT_HAND"
-                      ? wordsCompleted >= 10
-                        ? "Right hand mastery achieved!"
-                        : wordsCompleted >= 5
-                          ? "Good right hand progress!"
-                          : "Keep training your right hand!"
+                  {missionType === "TIMED_TYPING"
+                    ? wordsCompleted >= 20
+                      ? "Lightning fast reflexes!"
                       : wordsCompleted >= 10
-                        ? "Excellent work, Space Commander!"
+                        ? "Good speed training!"
+                        : "Keep practicing your speed!"
+                    : missionType === "LEFT_HAND"
+                      ? wordsCompleted >= 10
+                        ? "Left hand mastery achieved!"
                         : wordsCompleted >= 5
-                          ? "Good job, Cadet!"
-                          : "Keep practicing, Recruit!"}
+                          ? "Good left hand progress!"
+                          : "Keep training your left hand!"
+                      : missionType === "RIGHT_HAND"
+                        ? wordsCompleted >= 10
+                          ? "Right hand mastery achieved!"
+                          : wordsCompleted >= 5
+                            ? "Good right hand progress!"
+                            : "Keep training your right hand!"
+                        : wordsCompleted >= 10
+                          ? "Excellent work, Space Commander!"
+                          : wordsCompleted >= 5
+                            ? "Good job, Cadet!"
+                            : "Keep practicing, Recruit!"}
                 </p>
               </div>
               <div className="space-y-2">
