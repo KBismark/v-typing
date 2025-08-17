@@ -78,6 +78,8 @@ export default function SpaceTypingGame() {
   const [pressedKeys, setPressedKeys] = useState<Set<string>>(new Set())
   const [wordsCompleted, setWordsCompleted] = useState(0)
   const [isCapsLockOn, setIsCapsLockOn] = useState(false)
+  const [totalMistakes, setTotalMistakes] = useState(0)
+  const [totalKeystrokes, setTotalKeystrokes] = useState(0)
 
   const getRandomWord = () => {
     switch (missionType) {
@@ -99,6 +101,8 @@ export default function SpaceTypingGame() {
     setWordsCompleted(0)
     setPressedKeys(new Set())
     setNeedsBackspace(false)
+    setTotalMistakes(0)
+    setTotalKeystrokes(0)
   }
 
   const endGame = () => {
@@ -149,12 +153,14 @@ export default function SpaceTypingGame() {
 
       if (key === "backspace") {
         setTypedText((prev) => prev.slice(0, -1))
+        setTotalKeystrokes((prev) => prev + 1)
       } else if (key.length === 1 && /[a-z]/.test(key)) {
         const isShiftPressed = event.shiftKey
         const shouldBeUppercase = isShiftPressed !== isCapsLockOn
         const characterToAdd = shouldBeUppercase ? key.toUpperCase() : key
 
         const newTypedText = typedText + characterToAdd
+        setTotalKeystrokes((prev) => prev + 1)
 
         const currentPosition = typedText.length
         if (currentPosition < currentWord.length) {
@@ -163,9 +169,11 @@ export default function SpaceTypingGame() {
 
           if (typedChar !== expectedChar) {
             playErrorSound()
+            setTotalMistakes((prev) => prev + 1)
           }
         } else {
           playErrorSound()
+          setTotalMistakes((prev) => prev + 1)
         }
 
         setTypedText(newTypedText)
@@ -313,6 +321,16 @@ export default function SpaceTypingGame() {
                 </p>
                 <p className="text-lg">
                   Words Completed: <span className="text-accent font-bold">{wordsCompleted}</span>
+                </p>
+                <p className="text-lg">
+                  Words Per Second:{" "}
+                  <span className="text-accent font-bold">{(wordsCompleted / (GAME_TIME - timeLeft)).toFixed(1)}</span>
+                </p>
+                <p className="text-lg">
+                  Mistakes Rate:{" "}
+                  <span className="text-destructive font-bold">
+                    {totalKeystrokes > 0 ? ((totalMistakes / totalKeystrokes) * 100).toFixed(1) : 0}%
+                  </span>
                 </p>
                 <p className="text-muted-foreground">
                   {missionType === "LEFT_HAND"
