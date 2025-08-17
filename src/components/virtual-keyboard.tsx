@@ -223,7 +223,7 @@ function Key({ keyData, position, isPressed, isNext, isFingerPosition, isShiftPr
   const getKeyColor = () => {
     if (isPressed) return "#8b5cf6"
     if (isNext) return "#5cd5f6"
-    if (isFingerPosition) return "#10b981" // Green for finger positions
+    if (isFingerPosition) return "#52eebd" // Green for finger positions
     if (key === "CapsLock" && isCapsLockOn) return "#059669"
     return "#334155"
   }
@@ -231,7 +231,7 @@ function Key({ keyData, position, isPressed, isNext, isFingerPosition, isShiftPr
   const getEmissiveColor = () => {
     if (isPressed) return "#8b5cf6"
     if (isNext) return "#5cd5f6"
-    if (isFingerPosition) return "#10b981" // Green emissive for finger positions
+    if (isFingerPosition) return "#52eebd" // Green emissive for finger positions
     if (key === "CapsLock" && isCapsLockOn) return "#059669"
     return "#000000"
   }
