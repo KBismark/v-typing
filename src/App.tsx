@@ -205,6 +205,29 @@ export default function SpaceTypingGame() {
     setNeedsBackspace(hasIncorrectCharacters)
   }, [typedText, currentWord, gameState])
 
+  useEffect(() => {
+    if (gameState === "playing") {
+      window.addEventListener("keydown", handleKeyPress)
+    } else {
+      window.removeEventListener("keydown", handleKeyPress)
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress)
+    }
+  }, [gameState, handleKeyPress])
+
+  useEffect(() => {
+    if (gameState === "playing" && timeLeft > 0) {
+      const timer = setTimeout(() => {
+        setTimeLeft((prev) => prev - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    } else if (gameState === "playing" && timeLeft === 0) {
+      endGame()
+    }
+  }, [gameState, timeLeft])
+
   return (
     <div className="w-full h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 z-0">
