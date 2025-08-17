@@ -104,6 +104,28 @@ export default function SpaceTypingGame() {
     setPressedKeys(new Set())
   }
 
+  const playErrorSound = useCallback(() => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+
+      oscillator.frequency.setValueAtTime(200, audioContext.currentTime) // Low frequency beep
+      oscillator.type = "sine"
+
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1)
+
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.1)
+    } catch (error) {
+      console.log("Audio not supported")
+    }
+  }, [])
+
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       if (gameState !== "playing") return
@@ -132,6 +154,19 @@ export default function SpaceTypingGame() {
 
         const newTypedText = typedText + characterToAdd
 
+        const currentPosition = typedText.length
+        if (currentPosition < currentWord.length) {
+          const expectedChar = currentWord[currentPosition].toLowerCase()
+          const typedChar = characterToAdd.toLowerCase()
+
+          if (typedChar !== expectedChar) {
+            playErrorSound()
+          }
+        } else {
+          // Typing beyond word length - also an error
+          playErrorSound()
+        }
+
         setTypedText(newTypedText)
 
         if (newTypedText.toLowerCase() === currentWord.toLowerCase()) {
@@ -143,7 +178,7 @@ export default function SpaceTypingGame() {
         }
       }
     },
-    [gameState, typedText, currentWord, isCapsLockOn],
+    [gameState, typedText, currentWord, isCapsLockOn, playErrorSound],
   )
 
   useEffect(() => {
