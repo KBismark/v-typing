@@ -29,6 +29,90 @@ const SHIFT_KEY_MAP: Record<string, string> = {
   "/": "?",
 }
 
+const FINGER_MAP: Record<string, string> = {
+  // Left pinky
+  "`": "left-pinky",
+  "1": "left-pinky",
+  q: "left-pinky",
+  a: "left-pinky",
+  z: "left-pinky",
+  tab: "left-pinky",
+  capslock: "left-pinky",
+  shift: "left-pinky",
+
+  // Left ring finger
+  "2": "left-ring",
+  w: "left-ring",
+  s: "left-ring",
+  x: "left-ring",
+
+  // Left middle finger
+  "3": "left-middle",
+  e: "left-middle",
+  d: "left-middle",
+  c: "left-middle",
+
+  // Left index finger
+  "4": "left-index",
+  "5": "left-index",
+  r: "left-index",
+  t: "left-index",
+  f: "left-index",
+  g: "left-index",
+  v: "left-index",
+  b: "left-index",
+
+  // Right index finger
+  "6": "right-index",
+  "7": "right-index",
+  y: "right-index",
+  u: "right-index",
+  h: "right-index",
+  j: "right-index",
+  n: "right-index",
+  m: "right-index",
+
+  // Right middle finger
+  "8": "right-middle",
+  i: "right-middle",
+  k: "right-middle",
+  ",": "right-middle",
+
+  // Right ring finger
+  "9": "right-ring",
+  o: "right-ring",
+  l: "right-ring",
+  ".": "right-ring",
+
+  // Right pinky
+  "0": "right-pinky",
+  "-": "right-pinky",
+  "=": "right-pinky",
+  p: "right-pinky",
+  "[": "right-pinky",
+  "]": "right-pinky",
+  "\\": "right-pinky",
+  ";": "right-pinky",
+  "'": "right-pinky",
+  "/": "right-pinky",
+  backspace: "right-pinky",
+  enter: "right-pinky",
+
+  // Thumbs
+  " ": "thumb",
+}
+
+const HOME_ROW_POSITIONS: Record<string, string> = {
+  "left-pinky": "a",
+  "left-ring": "s",
+  "left-middle": "d",
+  "left-index": "f",
+  "right-index": "j",
+  "right-middle": "k",
+  "right-ring": "l",
+  "right-pinky": ";",
+}
+
 const KEYBOARD_LAYOUT = [
   [
     { key: "`", width: 1 },
@@ -106,13 +190,14 @@ const KEYBOARD_LAYOUT = [
 interface KeyProps {
   keyData: { key: string; width: number }
   position: [number, number, number]
-  isPressed: boolean;
-  isNext?: boolean;
+  isPressed: boolean
+  isNext?: boolean
+  isFingerPosition?: boolean // Added finger position highlighting
   isShiftPressed: boolean
   isCapsLockOn: boolean
 }
 
-function Key({ keyData, position, isPressed, isNext,  isShiftPressed, isCapsLockOn }: KeyProps) {
+function Key({ keyData, position, isPressed, isNext, isFingerPosition, isShiftPressed, isCapsLockOn }: KeyProps) {
   const meshRef = useRef<Mesh>(null)
   const { key, width } = keyData
 
@@ -136,21 +221,25 @@ function Key({ keyData, position, isPressed, isNext,  isShiftPressed, isCapsLock
   }
 
   const getKeyColor = () => {
-    if (isPressed) return "#8b5cf6";
-    if (isNext) return "#5cd5f6";
+    if (isPressed) return "#8b5cf6"
+    if (isNext) return "#5cd5f6"
+    if (isFingerPosition) return "#52eebd" // Green for finger positions
     if (key === "CapsLock" && isCapsLockOn) return "#059669"
     return "#334155"
   }
 
   const getEmissiveColor = () => {
     if (isPressed) return "#8b5cf6"
-    if (isNext) return "#5cd5f6";
+    if (isNext) return "#5cd5f6"
+    if (isFingerPosition) return "#52eebd" // Green emissive for finger positions
     if (key === "CapsLock" && isCapsLockOn) return "#059669"
     return "#000000"
   }
 
   const getEmissiveIntensity = () => {
     if (isPressed) return 0.3
+    if (isNext) return 0.3
+    if (isFingerPosition) return 0.2 // Subtle glow for finger positions
     if (key === "CapsLock" && isCapsLockOn) return 0.2
     return 0
   }
@@ -200,6 +289,26 @@ interface VirtualKeyboardProps {
 export default function VirtualKeyboard({ pressedKeys, isCapsLockOn, nextKey }: VirtualKeyboardProps) {
   const isShiftPressed = pressedKeys.has("shift")
 
+  const getFingerPositionsToHighlight = (targetKey: string): Set<string> => {
+    const positions = new Set<string>()
+
+    if (!targetKey) return positions
+
+    const targetFinger = FINGER_MAP[targetKey.toLowerCase()]
+    if (!targetFinger) return positions
+
+    // Highlight home positions for all fingers except the one typing
+    Object.entries(HOME_ROW_POSITIONS).forEach(([finger, homeKey]) => {
+      if (finger !== targetFinger) {
+        positions.add(homeKey)
+      }
+    })
+
+    return positions
+  }
+
+  const fingerPositions = getFingerPositionsToHighlight(nextKey)
+
   return (
     <div className="w-full h-96 transform -translate-x-4">
       <Canvas camera={{ fov: 100, near: 0.1, far: 1000, position: [0.04, -0.4, 3.6] }}>
@@ -237,7 +346,7 @@ export default function VirtualKeyboard({ pressedKeys, isCapsLockOn, nextKey }: 
                 isShiftPressed={isShiftPressed}
                 isCapsLockOn={isCapsLockOn}
                 isNext={keyData.key.toLowerCase() === nextKey.toLowerCase()}
-
+                isFingerPosition={fingerPositions.has(keyData.key.toLowerCase())} // Added finger position highlighting
               />
             )
           })
