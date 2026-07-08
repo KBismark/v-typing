@@ -7,60 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import VirtualKeyboard from "@/components/virtual-keyboard"
 import GameInterface from "@/components/game-interface"
+import { WORDS, LEFT_HAND, RIGHT_HAND } from "@/lib/dictionary"
 
-const WORDS = [
-  "space",
-  "galaxy",
-  "nebula",
-  "cosmos",
-  "stellar",
-  "orbit",
-  "planet",
-  "meteor",
-  "asteroid",
-  "comet",
-  "universe",
-  "infinity",
-  "quantum",
-  "gravity",
-  "fusion",
-]
 
-const LEFT_HAND = [
-  "qwert",
-  "asdfg",
-  "zxcvb",
-  "qwe",
-  "asd",
-  "zxc",
-  "wer",
-  "sdf",
-  "xcv",
-  "ert",
-  "dfg",
-  "cvb",
-  "qwer",
-  "asdf",
-  "zxcv",
-]
-
-const RIGHT_HAND = [
-  "yuiop",
-  "hjkl",
-  "nm",
-  "yui",
-  "hjk",
-  "uio",
-  "jkl",
-  "iop",
-  "yuio",
-  "hjkl",
-  "uiop",
-  "jklm",
-  "yui",
-  "hjk",
-  "iop",
-]
 
 const TIME_OPTIONS = [0.2, 0.3, 0.6, 1, 2, 3, 5]
 
