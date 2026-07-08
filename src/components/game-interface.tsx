@@ -22,21 +22,6 @@ export default function GameInterface({
 
   return (
     <div className="flex flex-col items-center space-y-8 w-full px-8 py-12">
-      {/* Stats Bar */}
-      {/* <div className="flex gap-12 text-center">
-        <Card className="p-6 bg-card/80 backdrop-blur-sm border-primary/20 min-w-[120px]">
-          <div className="text-3xl font-bold text-primary">{score}</div>
-          <div className="text-base text-muted-foreground">Score</div>
-        </Card>
-        <Card className="p-6 bg-card/80 backdrop-blur-sm border-accent/20 min-w-[120px]">
-          <div className="text-3xl font-bold text-accent">{wordsCompleted}</div>
-          <div className="text-base text-muted-foreground">Words</div>
-        </Card>
-        <Card className="p-6 bg-card/80 backdrop-blur-sm border-destructive/20 min-w-[120px]">
-          <div className="text-3xl font-bold text-destructive">{timeLeft}</div>
-          <div className="text-base text-muted-foreground">Time</div>
-        </Card>
-      </div> */}
 
       {/* Time Progress */}
       <div className="w-full max-w-2xl">
@@ -45,7 +30,6 @@ export default function GameInterface({
 
       {/* Word Display */}
       <Card className="px-12 py-6 bg-card/80 backdrop-blur-sm border-primary/20 text-center min-w-[600px]">
-        {/* <div className="text-lg text-muted-foreground mb-4">Type this word:</div> */}
         <div className="text-6xl font-bold font-mono tracking-wider mb-6">
           {currentWord.split("").map((char, index) => (
             <span
@@ -73,11 +57,6 @@ export default function GameInterface({
         </div>
       </Card>
 
-      {/* Instructions */}
-      {/* <div className="text-center text-muted-foreground">
-        <p className="text-base">Use your keyboard to type the word above</p>
-        <p className="text-base">Complete as many words as possible before time runs out!</p>
-      </div> */}
     </div>
   )
 }
