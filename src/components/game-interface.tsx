@@ -14,8 +14,6 @@ export default function GameInterface({
   currentWord,
   typedText,
   timeLeft,
-  score,
-  wordsCompleted,
   totalTime,
 }: GameInterfaceProps) {
   const timeProgress = (timeLeft / totalTime) * 100
